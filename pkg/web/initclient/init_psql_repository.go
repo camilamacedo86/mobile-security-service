@@ -1,10 +1,10 @@
 package initclient
 
 import (
+	log "github.com/sirupsen/logrus"
 	"database/sql"
 
 	"github.com/aerogear/mobile-security-service/pkg/models"
-	"github.com/labstack/gommon/log"
 )
 
 type (
@@ -93,13 +93,23 @@ func (a *initPostgreSQLRepository) GetAppByAppID(appID string) (*models.App, err
 
 }
 
-// GetAppByID retrieves an app by id from the database
-func (a *initPostgreSQLRepository) UpsertVersion(version *models.Version) (*models.Version, error) {
-	version1 := models.Version{
-		ID:      "a0874c82-2b7f-11e9-b210-d663bd873d93",
-		Version: "1.2.1",
-		AppID:   "com.aerogear.app1",
+// UpsertVersion updates an existing version 
+// or creates a new one if it does not exist
+func (a *initPostgreSQLRepository) UpsertVersion(version *models.Version) (error) {
+	// TODO: Add updated_at column to version table
+	sqlStatement := `
+	INSERT INTO version(id, version, app_id, disabled, disabled_message, num_of_app_launches)
+	VALUES($1, $2, $3, $4, $5, $6)
+	ON CONFLICT (id)
+	DO UPDATE
+	SET num_of_app_launches = $6;
+	`
+
+	_, err := a.db.Exec(sqlStatement, version.ID, version.Version, version.AppID, version.Disabled, version.DisabledMessage, version.NumOfAppLaunches)
+
+	if err != nil {
+		return models.ErrDatabaseError
 	}
 
-	return &version1, nil
+	return nil
 }

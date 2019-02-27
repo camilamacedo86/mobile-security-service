@@ -6,7 +6,7 @@ import (
 	"github.com/aerogear/mobile-security-service/pkg/web/initclient"
 	"github.com/aerogear/mobile-security-service/pkg/web/middleware"
 	"github.com/labstack/echo"
-	"gopkg.in/go-playground/validator.v9"
+	validator "gopkg.in/go-playground/validator.v9"
 )
 
 type requestValidator struct {
