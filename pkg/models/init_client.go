@@ -1,8 +1,8 @@
 package models
 
-// Init model
+// InitClient model
 // swagger:model Init
-type Init struct {
+type InitClient struct {
 	ID              string `json:"id"`
 	Version         string `json:"version"`
 	AppID           string `json:"appId"`

@@ -39,11 +39,19 @@ var _ Service = &ServiceMock{}
 //             GetAppsFunc: func() (*[]models.App, error) {
 // 	               panic("mock out the GetApps method")
 //             },
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
 //             UnbindingAppByAppIDFunc: func(appID string) error {
 // 	               panic("mock out the UnbindingAppByAppID method")
 //             },
+=======
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 //             UpdateAppVersionsFunc: func(versions []models.Version) error {
 // 	               panic("mock out the UpdateAppVersions method")
+=======
+//             InitClientAppFunc: func(deviceInfo *models.Device) (*models.InitClient, error) {
+// 	               panic("mock out the InitClientApp method")
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 //             },
 //         }
 //
@@ -64,11 +72,19 @@ type ServiceMock struct {
 	// GetAppsFunc mocks the GetApps method.
 	GetAppsFunc func() (*[]models.App, error)
 
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
 	// UnbindingAppByAppIDFunc mocks the UnbindingAppByAppID method.
 	UnbindingAppByAppIDFunc func(appID string) error
 
+=======
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 	// UpdateAppVersionsFunc mocks the UpdateAppVersions method.
 	UpdateAppVersionsFunc func(versions []models.Version) error
+=======
+	// InitClientAppFunc mocks the InitClientApp method.
+	InitClientAppFunc func(deviceInfo *models.Device) (*models.InitClient, error)
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -94,15 +110,25 @@ type ServiceMock struct {
 		// GetApps holds details about calls to the GetApps method.
 		GetApps []struct {
 		}
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
 		// UnbindingAppByAppID holds details about calls to the UnbindingAppByAppID method.
 		UnbindingAppByAppID []struct {
 			// AppID is the appID argument value.
 			AppID string
 		}
+=======
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 		// UpdateAppVersions holds details about calls to the UpdateAppVersions method.
 		UpdateAppVersions []struct {
 			// Versions is the versions argument value.
 			Versions []models.Version
+=======
+		// InitClientApp holds details about calls to the InitClientApp method.
+		InitClientApp []struct {
+			// DeviceInfo is the deviceInfo argument value.
+			DeviceInfo *models.Device
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 		}
 	}
 }
@@ -234,6 +260,7 @@ func (mock *ServiceMock) GetAppsCalls() []struct {
 	return calls
 }
 
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
 // UnbindingAppByAppID calls UnbindingAppByAppIDFunc.
 func (mock *ServiceMock) UnbindingAppByAppID(appID string) error {
 	if mock.UnbindingAppByAppIDFunc == nil {
@@ -265,6 +292,9 @@ func (mock *ServiceMock) UnbindingAppByAppIDCalls() []struct {
 	return calls
 }
 
+=======
+<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 // UpdateAppVersions calls UpdateAppVersionsFunc.
 func (mock *ServiceMock) UpdateAppVersions(versions []models.Version) error {
 	if mock.UpdateAppVersionsFunc == nil {
@@ -293,5 +323,35 @@ func (mock *ServiceMock) UpdateAppVersionsCalls() []struct {
 	lockServiceMockUpdateAppVersions.RLock()
 	calls = mock.calls.UpdateAppVersions
 	lockServiceMockUpdateAppVersions.RUnlock()
+=======
+// InitClientApp calls InitClientAppFunc.
+func (mock *ServiceMock) InitClientApp(deviceInfo *models.Device) (*models.InitClient, error) {
+	if mock.InitClientAppFunc == nil {
+		panic("ServiceMock.InitClientAppFunc: method is nil but Service.InitClientApp was just called")
+	}
+	callInfo := struct {
+		DeviceInfo *models.Device
+	}{
+		DeviceInfo: deviceInfo,
+	}
+	lockServiceMockInitClientApp.Lock()
+	mock.calls.InitClientApp = append(mock.calls.InitClientApp, callInfo)
+	lockServiceMockInitClientApp.Unlock()
+	return mock.InitClientAppFunc(deviceInfo)
+}
+
+// InitClientAppCalls gets all the calls that were made to InitClientApp.
+// Check the length with:
+//     len(mockedService.InitClientAppCalls())
+func (mock *ServiceMock) InitClientAppCalls() []struct {
+	DeviceInfo *models.Device
+} {
+	var calls []struct {
+		DeviceInfo *models.Device
+	}
+	lockServiceMockInitClientApp.RLock()
+	calls = mock.calls.InitClientApp
+	lockServiceMockInitClientApp.RUnlock()
+>>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
 	return calls
 }

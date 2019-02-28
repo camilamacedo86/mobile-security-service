@@ -328,6 +328,7 @@ func Test_httpHandler_GetActiveAppByID(t *testing.T) {
 	// make and configure a mocked Service
 	app := helpers.GetMockApp()
 
+	// Setup
 	type fields struct {
 		Service Service
 	}

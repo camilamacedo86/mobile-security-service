@@ -2,6 +2,7 @@ package initclient
 
 import (
 	"errors"
+	"github.com/aerogear/mobile-security-service/pkg/web/apps"
 	"net/http"
 
 	"github.com/aerogear/mobile-security-service/pkg/httperrors"
@@ -13,21 +14,19 @@ import (
 type (
 	// HTTPHandler instance
 	HTTPHandler struct {
-		Service Service
+		appsService apps.Service
 	}
 )
 
 // NewHTTPHandler returns a new instance of app.Handler
-func NewHTTPHandler(e *echo.Echo, s Service) *HTTPHandler {
-	handler := &HTTPHandler{
-		Service: s,
+func NewHTTPHandler(e *echo.Echo, a apps.Service) *HTTPHandler {
+	return &HTTPHandler{
+		appsService: a,
 	}
-
-	return handler
 }
 
 // InitClientApp stores device information and returns if the app version is disabled
-func (a *HTTPHandler) InitClientApp(c echo.Context) error {
+func (handler *HTTPHandler) InitClientApp(c echo.Context) error {
 	deviceInfo := new(models.Device)
 
 	if err := c.Bind(deviceInfo); err != nil {
@@ -39,7 +38,7 @@ func (a *HTTPHandler) InitClientApp(c echo.Context) error {
 		return httperrors.BadRequest(c, err.Error())
 	}
 
-	initResponse, err := a.Service.InitClientApp(deviceInfo)
+	initResponse, err := handler.appsService.InitClientApp(deviceInfo)
 
 	// If no app has been found in the database, return a bad request to the client
 	if err == models.ErrNotFound {

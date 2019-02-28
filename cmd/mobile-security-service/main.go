@@ -104,9 +104,7 @@ func setupServer(e *echo.Echo, c config.Config, dbConn *sql.DB) {
 	router.SetAppRoutes(apiGroup, appsHandler)
 
 	// Initclient handler setup
-	initclientPostgreSQLRepository := initclient.NewPostgreSQLRepository(dbConn)
-	initclientService := initclient.NewService(initclientPostgreSQLRepository)
-	initclientHandler := initclient.NewHTTPHandler(e, initclientService)
+	initclientHandler := initclient.NewHTTPHandler(e, appsService)
 
 	// Setup initclient routes
 	router.SetInitRoutes(apiGroup, initclientHandler)
