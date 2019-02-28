@@ -61,6 +61,7 @@ func (a *appsPostgreSQLRepository) GetApps() (*[]models.App, error) {
 	return &apps, nil
 }
 
+// GetAppVersionsByAppID returns app app versions with the provided app ID
 func (a *appsPostgreSQLRepository) GetAppVersionsByAppID(id string) (*[]models.Version, error) {
 	rows, err := a.db.Query(`
 	SELECT v.id,v.version,v.app_id, v.disabled, v.disabled_message, v.num_of_app_launches,

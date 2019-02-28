@@ -1,15 +1,15 @@
 package initclient
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/aerogear/mobile-security-service/pkg/models"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 type (
 	// Service defines the interface methods to be used
 	Service interface {
-		InitClientApp(deviceInfo *models.Device) (*models.Version, error)
+		InitClientApp(deviceInfo *models.Device) (*models.Init, error)
 	}
 
 	initService struct {
@@ -25,7 +25,7 @@ func NewService(repository Repository) Service {
 }
 
 // InitClientApp retrieves the list of apps from the repository
-func (a *initService) InitClientApp(deviceInfo *models.Device) (*models.Version, error) {
+func (a *initService) InitClientApp(deviceInfo *models.Device) (*models.Init, error) {
 	// Check if the app exists in the database for the sent app_id
 	if _, err := a.repository.GetAppByAppID(deviceInfo.AppID); err != nil {
 		return nil, err
@@ -41,8 +41,7 @@ func (a *initService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 	// If the version does not exist, create it
 	if err == models.ErrNotFound {
 		// Create new uuid for our new app version
-		// TODO: Replace with Google GUID library
-		versionUUID := uuid.NewV4()
+		versionUUID := uuid.New()
 
 		version = &models.Version{
 			ID:               versionUUID.String(),
@@ -55,27 +54,46 @@ func (a *initService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 	// Increment the version App Launches
 	version.NumOfAppLaunches++
 
-	if err := a.repository.UpsertVersion(version); err != nil {
-		log.Warn(err)
+	// Update the existing version or create a new one
+	if err := a.repository.InsertVersionOrUpdateNumOfAppLaunches(version); err != nil {
+		log.Error(err)
 		return nil, err
 	}
 
-	// device, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID)
+	// If we can't find the device by version and app ID
+	if _, err = a.repository.GetDeviceByVersionAndAppID(version.Version, deviceInfo.AppID); err == models.ErrNotFound {
 
-	// Check app exists first and if not, return a 400
-	// 1. Get version from version + appId,
-	// 2. Get device from deviceId + versionId + AppId
-	// 3. Increment appLaunches
-	// 4. Create or Update the device row in the table
+		// If we can't find the device by device ID and app ID
+		if _, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID); err == models.ErrNotFound {
 
-	// TODO
-	// Increment app launches for this appId and version
-	// Get disabled and disabledMessage for this version
+			id := uuid.New()
 
-	// Check device table to see if this device exists for the current version and appId
-	// 		If yes - Do nothing
-	// 		If no - Check if it exists for this appId + deviceId, update the versionId to the current version.
-	// 						If it doesn't exist at all, create a new row
+			// Build a new device to save to the database
+			device := models.Device{
+				ID:            id.String(),
+				VersionID:     version.ID,
+				Version:       version.Version,
+				AppID:         deviceInfo.AppID,
+				DeviceID:      deviceInfo.DeviceID,
+				DeviceVersion: deviceInfo.DeviceVersion,
+				DeviceType:    deviceInfo.DeviceType,
+			}
 
-	return version, nil
+			// Could not insert the device
+			if err := a.repository.CreateDevice(&device); err != nil {
+				log.Error(err)
+			}
+		}
+	}
+
+	// Build a model for the init data to return
+	initData := models.Init{
+		ID:              version.ID,
+		Version:         version.Version,
+		AppID:           version.AppID,
+		Disabled:        version.Disabled,
+		DisabledMessage: version.DisabledMessage,
+	}
+
+	return &initData, nil
 }
