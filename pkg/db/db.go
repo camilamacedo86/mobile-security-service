@@ -54,6 +54,7 @@ func Setup(db *sql.DB) error {
 			disabled boolean DEFAULT false NOT NULL,
 			disabled_message character varying,
 			num_of_app_launches integer DEFAULT 0 NOT NULL,
+			last_launched_at timestamp without time zone,
 			unique (app_id, version)
 		);
 

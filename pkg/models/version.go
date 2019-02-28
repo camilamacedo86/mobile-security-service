@@ -10,5 +10,6 @@ type Version struct {
 	DisabledMessage      string   `json:"disabledMessage,omitempty"`
 	NumOfCurrentInstalls int64    `json:"numOfCurrentInstalls,omitempty"`
 	NumOfAppLaunches     int64    `json:"numOfAppLaunches,omitempty"`
+	LastLaunchedAt       string   `json:"lastLaunchedAt,omitempty"`
 	Devices              []Device `json:"devices,omitempty"`
 }
