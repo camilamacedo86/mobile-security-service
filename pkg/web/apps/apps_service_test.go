@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/google/uuid"
+
 	"github.com/aerogear/mobile-security-service/pkg/helpers"
 	"github.com/aerogear/mobile-security-service/pkg/models"
 )
@@ -351,6 +353,241 @@ func Test_appsService_BindingApp(t *testing.T) {
 			if (err != nil) && (tt.wantErr != err || tt.wantErr == nil) {
 				t.Errorf("appsService.BindingAppByApp() error = %v, wantErr %v", err, tt.wantErr)
 				return
+			}
+		})
+	}
+}
+
+func Test_appsService_InitClientApp(t *testing.T) {
+	type fields struct {
+		app     *models.App
+		version *models.Version
+		device  *models.Device
+	}
+	type args struct {
+		deviceInfo *models.Device
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *models.InitClient
+		wantErr error
+	}{
+		{
+			name:    "InitClient() should return ErrNotFound when app not found",
+			wantErr: models.ErrNotFound,
+			want:    nil,
+			args: args{
+				deviceInfo: &models.Device{
+					ID:            uuid.New().String(),
+					VersionID:     uuid.New().String(),
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      uuid.New().String(),
+					Version:       "2.0",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+			fields: fields{
+				app: nil,
+			},
+		},
+		{
+			name:    "InitClient() should return init client data",
+			wantErr: nil,
+			args: args{
+				deviceInfo: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.0",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+			fields: fields{
+				app: &models.App{
+					ID:      uuid.New().String(),
+					AppID:   "com.aerogear.testapp",
+					AppName: "Test App",
+				},
+				version: &models.Version{
+					ID:                   uuid.New().String(),
+					AppID:                "com.aerogear.testapp",
+					Version:              "2.0",
+					Disabled:             false,
+					DisabledMessage:      "",
+					NumOfCurrentInstalls: 1000,
+					NumOfAppLaunches:     10000,
+				},
+				device: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.0",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+		},
+		{
+			name:    "InitClient() should create a new device when device with device ID and app ID not found",
+			wantErr: nil,
+			args: args{
+				deviceInfo: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.0",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+			fields: fields{
+				app: &models.App{
+					ID:      uuid.New().String(),
+					AppID:   "com.aerogear.testapp",
+					AppName: "Test App",
+				},
+				version: &models.Version{
+					ID:                   uuid.New().String(),
+					AppID:                "com.aerogear.testapp",
+					Version:              "2.0",
+					Disabled:             false,
+					DisabledMessage:      "",
+					NumOfCurrentInstalls: 1000,
+					NumOfAppLaunches:     10000,
+				},
+				device: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.0",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+		},
+		{
+			name:    "Insert a new version and return init data when new version number is found",
+			wantErr: nil,
+			args: args{
+				deviceInfo: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.1",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+			fields: fields{
+				app: &models.App{
+					ID:      uuid.New().String(),
+					AppID:   "com.aerogear.testapp",
+					AppName: "Test App",
+				},
+				version: &models.Version{
+					ID:                   "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:                "com.aerogear.testapp",
+					Version:              "2.0",
+					Disabled:             false,
+					DisabledMessage:      "",
+					NumOfCurrentInstalls: 1000,
+					NumOfAppLaunches:     10000,
+				},
+				device: &models.Device{
+					ID:            "ccf2c998-992e-4db4-b395-22ac515d6c21",
+					VersionID:     "12da0a46-f94d-4ab3-8e3e-f4366d63d14d",
+					AppID:         "com.aerogear.testapp",
+					DeviceID:      "3ee2a7e7-25e4-465f-a998-c781b3cb9d46",
+					Version:       "2.1",
+					DeviceVersion: "8.1",
+					DeviceType:    "Android",
+				},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			mockedRepository := &RepositoryMock{
+				GetAppByAppIDFunc: func(appID string) (*models.App, error) {
+					if tt.fields.app == nil {
+						return nil, models.ErrNotFound
+					}
+
+					return tt.fields.app, nil
+				},
+				GetVersionByAppIDAndVersionFunc: func(appID string, version string) (*models.Version, error) {
+					if (tt.fields.version != nil) && (tt.fields.version.AppID != appID || tt.fields.version.Version != version) {
+						return nil, models.ErrNotFound
+					}
+
+					return tt.fields.version, nil
+				},
+				InsertVersionOrUpdateNumOfAppLaunchesFunc: func(version *models.Version) error {
+					if version == nil {
+						return models.ErrDatabaseError
+					}
+					return nil
+				},
+				GetDeviceByVersionAndAppIDFunc: func(version string, appID string) (*models.Device, error) {
+					if (tt.fields.version != nil) && (tt.fields.version.Version != version || tt.args.deviceInfo.AppID != appID) {
+						return nil, models.ErrNotFound
+					}
+
+					return tt.args.deviceInfo, nil
+				},
+				GetDeviceByDeviceIDAndAppIDFunc: func(deviceID string, appID string) (*models.Device, error) {
+					if tt.fields.device != nil {
+						return nil, models.ErrNotFound
+					}
+
+					if tt.fields.device.DeviceID != deviceID || tt.fields.device.AppID != appID {
+						return nil, models.ErrNotFound
+					}
+
+					return tt.fields.device, nil
+				},
+				CreateDeviceFunc: func(device *models.Device) error {
+					if device == nil {
+						return models.ErrDatabaseError
+					}
+
+					return nil
+				},
+			}
+
+			service := NewService(mockedRepository)
+
+			got, err := service.InitClientApp(tt.args.deviceInfo)
+
+			if err == nil {
+				tt.want = &models.InitClient{
+					ID:              tt.fields.version.ID,
+					Version:         tt.fields.version.Version,
+					AppID:           tt.fields.version.AppID,
+					Disabled:        tt.fields.version.Disabled,
+					DisabledMessage: tt.fields.version.DisabledMessage,
+				}
+			}
+
+			if err != tt.wantErr {
+				t.Errorf("appsService.InitClientApp() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// If a new version was not created, expect to return an exact device match
+			if tt.fields.version != nil && (tt.fields.version.Version == tt.args.deviceInfo.Version && tt.fields.version.AppID == tt.args.deviceInfo.AppID) && !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("appsService.InitClientApp() = %v, want %v", got, tt.want)
 			}
 		})
 	}
