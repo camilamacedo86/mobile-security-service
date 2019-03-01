@@ -14,6 +14,7 @@ var (
 	lockRepositoryMockGetAppByID                            sync.RWMutex
 	lockRepositoryMockGetAppVersionsByAppID                 sync.RWMutex
 	lockRepositoryMockGetApps                               sync.RWMutex
+	lockRepositoryMockGetDeviceByDeviceID                   sync.RWMutex
 	lockRepositoryMockGetDeviceByDeviceIDAndAppID           sync.RWMutex
 	lockRepositoryMockGetDeviceByVersionAndAppID            sync.RWMutex
 	lockRepositoryMockGetVersionByAppIDAndVersion           sync.RWMutex
@@ -44,6 +45,9 @@ var _ Repository = &RepositoryMock{}
 //             },
 //             GetAppsFunc: func() (*[]models.App, error) {
 // 	               panic("mock out the GetApps method")
+//             },
+//             GetDeviceByDeviceIDFunc: func(deviceID string) (*models.Device, error) {
+// 	               panic("mock out the GetDeviceByDeviceID method")
 //             },
 //             GetDeviceByDeviceIDAndAppIDFunc: func(deviceID string, appID string) (*models.Device, error) {
 // 	               panic("mock out the GetDeviceByDeviceIDAndAppID method")
@@ -78,6 +82,9 @@ type RepositoryMock struct {
 
 	// GetAppsFunc mocks the GetApps method.
 	GetAppsFunc func() (*[]models.App, error)
+
+	// GetDeviceByDeviceIDFunc mocks the GetDeviceByDeviceID method.
+	GetDeviceByDeviceIDFunc func(deviceID string) (*models.Device, error)
 
 	// GetDeviceByDeviceIDAndAppIDFunc mocks the GetDeviceByDeviceIDAndAppID method.
 	GetDeviceByDeviceIDAndAppIDFunc func(deviceID string, appID string) (*models.Device, error)
@@ -115,6 +122,11 @@ type RepositoryMock struct {
 		}
 		// GetApps holds details about calls to the GetApps method.
 		GetApps []struct {
+		}
+		// GetDeviceByDeviceID holds details about calls to the GetDeviceByDeviceID method.
+		GetDeviceByDeviceID []struct {
+			// DeviceID is the deviceID argument value.
+			DeviceID string
 		}
 		// GetDeviceByDeviceIDAndAppID holds details about calls to the GetDeviceByDeviceIDAndAppID method.
 		GetDeviceByDeviceIDAndAppID []struct {
@@ -292,6 +304,37 @@ func (mock *RepositoryMock) GetAppsCalls() []struct {
 	lockRepositoryMockGetApps.RLock()
 	calls = mock.calls.GetApps
 	lockRepositoryMockGetApps.RUnlock()
+	return calls
+}
+
+// GetDeviceByDeviceID calls GetDeviceByDeviceIDFunc.
+func (mock *RepositoryMock) GetDeviceByDeviceID(deviceID string) (*models.Device, error) {
+	if mock.GetDeviceByDeviceIDFunc == nil {
+		panic("RepositoryMock.GetDeviceByDeviceIDFunc: method is nil but Repository.GetDeviceByDeviceID was just called")
+	}
+	callInfo := struct {
+		DeviceID string
+	}{
+		DeviceID: deviceID,
+	}
+	lockRepositoryMockGetDeviceByDeviceID.Lock()
+	mock.calls.GetDeviceByDeviceID = append(mock.calls.GetDeviceByDeviceID, callInfo)
+	lockRepositoryMockGetDeviceByDeviceID.Unlock()
+	return mock.GetDeviceByDeviceIDFunc(deviceID)
+}
+
+// GetDeviceByDeviceIDCalls gets all the calls that were made to GetDeviceByDeviceID.
+// Check the length with:
+//     len(mockedRepository.GetDeviceByDeviceIDCalls())
+func (mock *RepositoryMock) GetDeviceByDeviceIDCalls() []struct {
+	DeviceID string
+} {
+	var calls []struct {
+		DeviceID string
+	}
+	lockRepositoryMockGetDeviceByDeviceID.RLock()
+	calls = mock.calls.GetDeviceByDeviceID
+	lockRepositoryMockGetDeviceByDeviceID.RUnlock()
 	return calls
 }
 

@@ -3,6 +3,7 @@ package apps
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/aerogear/mobile-security-service/pkg/models"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -121,7 +122,7 @@ func (a *appsPostgreSQLRepository) GetActiveAppByID(ID string) (*models.App, err
 	return &app, nil
 }
 
-// InitClientApp retrieves all apps from the database
+// GetDeviceByDeviceID gets a device by its Device ID
 func (a *appsPostgreSQLRepository) GetDeviceByDeviceID(deviceID string) (*models.Device, error) {
 	query := `
 	SELECT id,version_id,app_id,device_id,device_type,device_version
@@ -131,7 +132,7 @@ func (a *appsPostgreSQLRepository) GetDeviceByDeviceID(deviceID string) (*models
 	row := a.db.QueryRow(query, deviceID)
 
 	var device models.Device
-	if err := row.Scan(&device.ID, device.VersionID, device.AppID, device.DeviceID, device.DeviceType, device.DeviceVersion); err != nil {
+	if err := row.Scan(&device.ID, &device.VersionID, &device.AppID, &device.DeviceID, &device.DeviceType, &device.DeviceVersion); err != nil {
 		log.Error(err)
 		switch err {
 		case sql.ErrNoRows:
@@ -144,7 +145,7 @@ func (a *appsPostgreSQLRepository) GetDeviceByDeviceID(deviceID string) (*models
 	return &device, nil
 }
 
-// InitClientApp retrieves all apps from the database
+// GetVersionByAppIDAndVersion gets a version by its app ID and version number
 func (a *appsPostgreSQLRepository) GetVersionByAppIDAndVersion(appID string, versionNumber string) (*models.Version, error) {
 	version := models.Version{}
 	var disabledMessage sql.NullString

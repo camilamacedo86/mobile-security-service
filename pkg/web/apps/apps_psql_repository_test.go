@@ -2,10 +2,15 @@ package apps
 
 import (
 	"database/sql/driver"
+	"reflect"
+	"testing"
+
 	"github.com/aerogear/mobile-security-service/pkg/helpers"
 	"github.com/aerogear/mobile-security-service/pkg/models"
-	"gopkg.in/DATA-DOG/go-sqlmock.v1"
-	"testing"
+
+	"github.com/google/uuid"
+	_ "github.com/lib/pq"
+	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 var (
@@ -43,6 +48,18 @@ var (
 	getUnDeleteAppByAppIDQueryString = `UPDATE app
 		SET deleted_at=NULL
 		WHERE app_id=\$1;`
+
+	getDeviceByDeviceIDQuery = `SELECT id,version_id,app_id,device_id,device_type,device_version
+	FROM device
+	WHERE device_id = \$1;`
+
+	getDeviceByDeviceIDAndAppIDQuery = `SELECT d.id, d.version_id, d.app_id, d.device_id, d.device_type, d.device_version
+	FROM device as d
+	WHERE d.device_id = \$1 AND d.app_id = \$2;`
+
+	getVersionByAppIDAndVersion = `SELECT v.id,v.version,v.app_id, v.disabled, v.disabled_message, v.num_of_app_launches, v.last_launched_at
+	FROM version as v
+	WHERE v.app_id = \$1 AND v.version = \$2;`
 )
 
 func Test_appsPostgreSQLRepository_GetApps_WillReturnTwoApps(t *testing.T) {
@@ -416,10 +433,85 @@ func Test_appsPostgreSQLRepository_DeleteAppByAppID(t *testing.T) {
 			t.Fatalf("Not get expected error when was trying to update the deleted_at of an app with an value")
 		}
 	}
-
 }
 
-func Test_appsPostgreSQLRepository_CreateApp(t *testing.T) {
+func Test_appsPostgreSQLRepository_GetDeviceByDeviceID(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("Unexpected error opening a stub database connection: %v", err)
+	}
+
+	defer db.Close()
+
+	cols := []string{"id", "version_id", "app_id", "device_id", "device_type", "device_version"}
+
+	mockDeviceList := []*models.Device{helpers.GetMockDevice(), helpers.GetMockDevice(), helpers.GetMockDevice()}
+
+	for _, d := range mockDeviceList {
+		sqlmock.NewRows(cols).AddRow(d.ID, d.VersionID, d.AppID, d.DeviceID, d.DeviceType, d.DeviceVersion)
+	}
+
+	wantDevice := helpers.GetMockDevice()
+
+	wantRow := sqlmock.NewRows(cols).AddRow(wantDevice.ID, wantDevice.VersionID, wantDevice.AppID, wantDevice.DeviceID, wantDevice.DeviceType, wantDevice.DeviceVersion)
+
+	type args struct {
+		deviceID string
+	}
+	type want struct {
+		device *models.Device
+		err    error
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantRows *sqlmock.Rows
+		want     want
+	}{
+		{
+			name: "GetDeviceByDeviceID() should return a device when valid ID supplied",
+			args: args{
+				deviceID: wantDevice.DeviceID,
+			},
+			wantRows: wantRow,
+			want: want{
+				device: wantDevice,
+				err:    nil,
+			},
+		},
+		{
+			name: "GetDeviceByDeviceID() should return ErrNotFound when invalid ID supplied",
+			args: args{
+				deviceID: uuid.New().String(),
+			},
+			wantRows: &sqlmock.Rows{},
+			want: want{
+				device: nil,
+				err:    models.ErrNotFound,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			mock.ExpectQuery(getDeviceByDeviceIDQuery).WithArgs(tt.args.deviceID).WillReturnRows(tt.wantRows)
+
+			repo := NewPostgreSQLRepository(db)
+
+			got, err := repo.GetDeviceByDeviceID(tt.args.deviceID)
+
+			if !reflect.DeepEqual(got, tt.want.device) {
+				t.Errorf("appsPostgreSQLRepository.GetDeviceByDeviceID() = %v, want %v", got, tt.want.device)
+			}
+
+			if !reflect.DeepEqual(err, tt.want.err) {
+				t.Errorf("appsPostgreSQLRepository.GetDeviceByDeviceID() error = %v, wantErr %v", got, tt.want.err)
+			}
+		})
+	}
+}
+
+func Test_appsPostgreSQLRepository_GetDeviceByDeviceIDAndAppID(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("Unexpected error opening a stub database connection: %v", err)
@@ -459,6 +551,7 @@ func Test_appsPostgreSQLRepository_CreateApp(t *testing.T) {
 			wantErr: true,
 		},
 	}
+
 	for _, tt := range tests {
 		err = a.CreateApp(tt.id, mockApps.AppID, mockApps.AppName)
 
@@ -520,6 +613,81 @@ func Test_appsPostgreSQLRepository_GetAppByAppID(t *testing.T) {
 
 func Test_appsPostgreSQLRepository_UnDeleteAppByAppID(t *testing.T) {
 	db, mock, err := sqlmock.New()
+	cols := []string{"id", "version_id", "app_id", "device_id", "device_type", "device_version"}
+
+	mockDeviceList := []*models.Device{helpers.GetMockDevice(), helpers.GetMockDevice(), helpers.GetMockDevice()}
+
+	for _, d := range mockDeviceList {
+		sqlmock.NewRows(cols).AddRow(d.ID, d.VersionID, d.AppID, d.DeviceID, d.DeviceType, d.DeviceVersion)
+	}
+
+	wantDevice := helpers.GetMockDevice()
+
+	row := sqlmock.NewRows(cols).AddRow(wantDevice.ID, wantDevice.VersionID, wantDevice.AppID, wantDevice.DeviceID, wantDevice.DeviceType, wantDevice.DeviceVersion)
+
+	type args struct {
+		deviceID string
+		appID    string
+	}
+	type want struct {
+		device *models.Device
+		err    error
+	}
+	tests := []struct {
+		name     string
+		args     args
+		wantRows *sqlmock.Rows
+		want     want
+	}{
+		{
+			name: "GetDeviceByDeviceIDAndAppID() should return a device when valid device ID and app ID supplied",
+			args: args{
+				deviceID: wantDevice.DeviceID,
+				appID:    wantDevice.AppID,
+			},
+			wantRows: row,
+			want: want{
+				device: wantDevice,
+				err:    nil,
+			},
+		},
+		{
+			name: "GetDeviceByDeviceIDAndAppID() should return ErrNotFound when invalid paramters provided",
+			args: args{
+				deviceID: uuid.New().String(),
+				appID:    uuid.New().String(),
+			},
+			wantRows: &sqlmock.Rows{},
+			want: want{
+				device: nil,
+				err:    models.ErrNotFound,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+
+			mock.ExpectQuery(getDeviceByDeviceIDAndAppIDQuery).WithArgs(tt.args.deviceID, tt.args.appID).WillReturnRows(tt.wantRows)
+
+			repo := NewPostgreSQLRepository(db)
+
+			got, err := repo.GetDeviceByDeviceIDAndAppID(tt.args.deviceID, tt.args.appID)
+
+			if !reflect.DeepEqual(got, tt.want.device) {
+				t.Errorf("appsPostgreSQLRepository.GetDeviceByDeviceID() = %v, want %v", got, tt.want.device)
+			}
+
+			if !reflect.DeepEqual(err, tt.want.err) {
+				t.Errorf("appsPostgreSQLRepository.GetDeviceByDeviceID() error = %v, wantErr %v", got, tt.want.err)
+			}
+		})
+	}
+}
+
+func Test_appsPostgreSQLRepository_GetVersionByAppIDAndVersion(t *testing.T) {
+	db, mock, err := sqlmock.New()
+
 	if err != nil {
 		t.Fatalf("Unexpected error opening a stub database connection: %v", err)
 	}
@@ -561,6 +729,76 @@ func Test_appsPostgreSQLRepository_UnDeleteAppByAppID(t *testing.T) {
 
 		if err == nil && tt.wantErr {
 			t.Fatalf("Not get expected error when was trying to create an app")
+		}
+		cols := []string{"id", "version", "app_id", "disabled", "disabled_message", "num_of_app_launches", "last_launched_at"}
+
+		mockVersionList := helpers.GetMockAppVersionList()
+
+		for _, v := range mockVersionList {
+			sqlmock.NewRows(cols).AddRow(v.ID, v.Version, v.AppID, v.Disabled, v.DisabledMessage, v.NumOfAppLaunches, v.LastLaunchedAt)
+		}
+
+		wantVersion := helpers.GetMockVersion()
+
+		row := sqlmock.NewRows(cols).AddRow(wantVersion.ID, wantVersion.Version, wantVersion.AppID, wantVersion.Disabled, wantVersion.DisabledMessage, wantVersion.NumOfAppLaunches, wantVersion.LastLaunchedAt)
+
+		type args struct {
+			appID         string
+			versionNumber string
+		}
+		type want struct {
+			version *models.Version
+			err     error
+		}
+		tests := []struct {
+			name     string
+			args     args
+			wantRows *sqlmock.Rows
+			want     want
+		}{
+			{
+				name: "GetVersionByAppIDAndVersion() should return a version when valid app ID and version number supplied",
+				args: args{
+					appID:         wantVersion.AppID,
+					versionNumber: wantVersion.Version,
+				},
+				wantRows: row,
+				want: want{
+					version: wantVersion,
+					err:     nil,
+				},
+			},
+			{
+				name: "GetVersionByAppIDAndVersion() should return ErrNotFound when invalid paramters provided",
+				args: args{
+					appID:         uuid.New().String(),
+					versionNumber: "100",
+				},
+				wantRows: &sqlmock.Rows{},
+				want: want{
+					version: nil,
+					err:     models.ErrNotFound,
+				},
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+
+				mock.ExpectQuery(getVersionByAppIDAndVersion).WithArgs(tt.args.appID, tt.args.versionNumber).WillReturnRows(tt.wantRows)
+
+				repo := NewPostgreSQLRepository(db)
+
+				got, err := repo.GetVersionByAppIDAndVersion(tt.args.appID, tt.args.versionNumber)
+
+				if !reflect.DeepEqual(got, tt.want.version) {
+					t.Errorf("appsPostgreSQLRepository.GetVersionByAppIDAndVersion() = %v, want %v", got, tt.want.version)
+				}
+
+				if !reflect.DeepEqual(err, tt.want.err) {
+					t.Errorf("appsPostgreSQLRepository.GetVersionByAppIDAndVersion() error = %v, wantErr %v", got, tt.want.err)
+				}
+			})
 		}
 	}
 }
