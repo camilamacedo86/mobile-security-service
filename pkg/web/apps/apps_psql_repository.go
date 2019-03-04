@@ -149,17 +149,13 @@ func (a *appsPostgreSQLRepository) GetDeviceByDeviceID(deviceID string) (*models
 func (a *appsPostgreSQLRepository) GetVersionByAppIDAndVersion(appID string, versionNumber string) (*models.Version, error) {
 	version := models.Version{}
 	var disabledMessage sql.NullString
-	var lastLaunchedAt sql.NullString
 
 	sqlStatement := `
 	SELECT v.id,v.version,v.app_id, v.disabled, v.disabled_message, v.num_of_app_launches, v.last_launched_at
 	FROM version as v
 	WHERE v.app_id = $1 AND v.version = $2;`
 
-	err := a.db.QueryRow(sqlStatement, appID, versionNumber).Scan(&version.ID, &version.Version, &version.AppID, &version.Disabled, &disabledMessage, &version.NumOfAppLaunches, &lastLaunchedAt)
-
-	version.DisabledMessage = disabledMessage.String
-	version.LastLaunchedAt = lastLaunchedAt.String
+	err := a.db.QueryRow(sqlStatement, appID, versionNumber).Scan(&version.ID, &version.Version, &version.AppID, &version.Disabled, &disabledMessage, &version.NumOfAppLaunches, &version.LastLaunchedAt)
 
 	if err != nil {
 		log.Error(err)
