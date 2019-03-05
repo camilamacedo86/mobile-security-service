@@ -557,8 +557,8 @@ func Test_appsService_InitClientApp(t *testing.T) {
 
 					return tt.fields.device, nil
 				},
-				CreateDeviceFunc: func(device *models.Device) error {
-					if device == nil {
+				InsertDeviceOrUpdateVersionIDFunc: func(device models.Device) error {
+					if &device == nil {
 						return models.ErrDatabaseError
 					}
 

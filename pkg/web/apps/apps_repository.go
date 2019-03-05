@@ -19,6 +19,5 @@ type Repository interface {
 	GetDeviceByDeviceIDAndAppID(deviceID string, appID string) (*models.Device, error)
 	GetDeviceByVersionAndAppID(versionID string, appID string) (*models.Device, error)
 	InsertVersionOrUpdateNumOfAppLaunches(version *models.Version) error
-	CreateDevice(device *models.Device) error
-	GetDeviceByDeviceID(deviceID string) (*models.Device, error)
+	InsertDeviceOrUpdateVersionID(device models.Device) error
 }

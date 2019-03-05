@@ -122,29 +122,6 @@ func (a *appsPostgreSQLRepository) GetActiveAppByID(ID string) (*models.App, err
 	return &app, nil
 }
 
-// GetDeviceByDeviceID gets a device by its Device ID
-func (a *appsPostgreSQLRepository) GetDeviceByDeviceID(deviceID string) (*models.Device, error) {
-	query := `
-	SELECT id,version_id,app_id,device_id,device_type,device_version
-	FROM device
-	WHERE device_id = $1;`
-
-	row := a.db.QueryRow(query, deviceID)
-
-	var device models.Device
-	if err := row.Scan(&device.ID, &device.VersionID, &device.AppID, &device.DeviceID, &device.DeviceType, &device.DeviceVersion); err != nil {
-		log.Error(err)
-		switch err {
-		case sql.ErrNoRows:
-			return nil, models.ErrNotFound
-		default:
-			return nil, models.ErrDatabaseError
-		}
-	}
-
-	return &device, nil
-}
-
 // GetVersionByAppIDAndVersion gets a version by its app ID and version number
 func (a *appsPostgreSQLRepository) GetVersionByAppIDAndVersion(appID string, versionNumber string) (*models.Version, error) {
 	version := models.Version{}
@@ -252,11 +229,14 @@ func (a *appsPostgreSQLRepository) InsertVersionOrUpdateNumOfAppLaunches(version
 	return nil
 }
 
-// CreateDevice creates a new device row in the device table
-func (a *appsPostgreSQLRepository) CreateDevice(device *models.Device) error {
+// InsertDeviceOrUpdateVersionID creates a new device row in the device table
+func (a *appsPostgreSQLRepository) InsertDeviceOrUpdateVersionID(device models.Device) error {
 	sqlStatement := `
 		INSERT INTO device(id,version_id,app_id,device_id,device_type,device_version)
-		VALUES($1, $2, $3, $4, $5, $6);`
+		VALUES($1, $2, $3, $4, $5, $6)
+		ON CONFLICT (id)
+		DO UPDATE
+		SET version_id = $2`
 
 	_, err := a.db.Exec(sqlStatement, device.ID, device.VersionID, device.AppID, device.DeviceID, device.DeviceType, device.DeviceVersion)
 
