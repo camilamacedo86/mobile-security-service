@@ -125,14 +125,13 @@ func (a *appsPostgreSQLRepository) GetActiveAppByID(ID string) (*models.App, err
 // GetVersionByAppIDAndVersion gets a version by its app ID and version number
 func (a *appsPostgreSQLRepository) GetVersionByAppIDAndVersion(appID string, versionNumber string) (*models.Version, error) {
 	version := models.Version{}
-	var disabledMessage sql.NullString
 
 	sqlStatement := `
 	SELECT v.id,v.version,v.app_id, v.disabled, v.disabled_message, v.num_of_app_launches, v.last_launched_at
 	FROM version as v
 	WHERE v.app_id = $1 AND v.version = $2;`
 
-	err := a.db.QueryRow(sqlStatement, appID, versionNumber).Scan(&version.ID, &version.Version, &version.AppID, &version.Disabled, &disabledMessage, &version.NumOfAppLaunches, &version.LastLaunchedAt)
+	err := a.db.QueryRow(sqlStatement, appID, versionNumber).Scan(&version.ID, &version.Version, &version.AppID, &version.Disabled, &version.DisabledMessage, &version.NumOfAppLaunches, &version.LastLaunchedAt)
 
 	if err != nil {
 		log.Error(err)
@@ -236,7 +235,7 @@ func (a *appsPostgreSQLRepository) InsertDeviceOrUpdateVersionID(device models.D
 		VALUES($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (id)
 		DO UPDATE
-		SET version_id = $2`
+		SET version_id = $2, device_version = $6`
 
 	_, err := a.db.Exec(sqlStatement, device.ID, device.VersionID, device.AppID, device.DeviceID, device.DeviceType, device.DeviceVersion)
 
