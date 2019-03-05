@@ -98,10 +98,10 @@ func TestHTTPHandler_InitClientApp(t *testing.T) {
 			c.SetPath("/api/init")
 
 			mockedAppService := &apps.ServiceMock{
-				InitClientAppFunc: func(device *models.Device) (*models.InitClient, error) {
+				InitClientAppFunc: func(device *models.Device) (*models.Version, error) {
 					id := uuid.New()
 
-					return &models.InitClient{
+					return &models.Version{
 						ID:              id.String(),
 						Version:         tt.args.device.Version,
 						AppID:           tt.args.device.AppID,

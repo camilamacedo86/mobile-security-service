@@ -47,6 +47,7 @@ var _ Service = &ServiceMock{}
 // 	               panic("mock out the GetApps method")
 //             },
 <<<<<<< HEAD
+<<<<<<< HEAD
 <<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
 //             UnbindingAppByAppIDFunc: func(appID string) error {
 // 	               panic("mock out the UnbindingAppByAppID method")
@@ -60,6 +61,9 @@ var _ Service = &ServiceMock{}
 =======
 >>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 //             InitClientAppFunc: func(deviceInfo *models.Device) (*models.InitClient, error) {
+=======
+//             InitClientAppFunc: func(deviceInfo *models.Device) (*models.Version, error) {
+>>>>>>> feat(init): Change response type (AEROGEAR-8360)
 // 	               panic("mock out the InitClientApp method")
 //             },
 //             UpdateAppVersionsFunc: func(versions []models.Version) error {
@@ -98,7 +102,7 @@ type ServiceMock struct {
 =======
 >>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 	// InitClientAppFunc mocks the InitClientApp method.
-	InitClientAppFunc func(deviceInfo *models.Device) (*models.InitClient, error)
+	InitClientAppFunc func(deviceInfo *models.Device) (*models.Version, error)
 
 	// UpdateAppVersionsFunc mocks the UpdateAppVersions method.
 	UpdateAppVersionsFunc func(versions []models.Version) error
@@ -352,7 +356,7 @@ func (mock *ServiceMock) UpdateAppVersionsCalls() []struct {
 =======
 >>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 // InitClientApp calls InitClientAppFunc.
-func (mock *ServiceMock) InitClientApp(deviceInfo *models.Device) (*models.InitClient, error) {
+func (mock *ServiceMock) InitClientApp(deviceInfo *models.Device) (*models.Version, error) {
 	if mock.InitClientAppFunc == nil {
 		panic("ServiceMock.InitClientAppFunc: method is nil but Service.InitClientApp was just called")
 	}

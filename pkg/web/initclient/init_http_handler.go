@@ -26,7 +26,7 @@ func NewHTTPHandler(e *echo.Echo, a apps.Service) *HTTPHandler {
 }
 
 // InitClientApp stores device information and returns if the app version is disabled
-func (handler *HTTPHandler) InitClientApp(c echo.Context) error {
+func (h *HTTPHandler) InitClientApp(c echo.Context) error {
 	deviceInfo := new(models.Device)
 
 	if err := c.Bind(deviceInfo); err != nil {
@@ -38,7 +38,7 @@ func (handler *HTTPHandler) InitClientApp(c echo.Context) error {
 		return httperrors.BadRequest(c, err.Error())
 	}
 
-	initResponse, err := handler.appsService.InitClientApp(deviceInfo)
+	initResponse, err := h.appsService.InitClientApp(deviceInfo)
 
 	// If no app has been found in the database, return a bad request to the client
 	if err == models.ErrNotFound {
