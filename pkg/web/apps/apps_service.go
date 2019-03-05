@@ -4,7 +4,6 @@ import (
 	"github.com/aerogear/mobile-security-service/pkg/helpers"
 	"github.com/aerogear/mobile-security-service/pkg/models"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 type (
@@ -140,14 +139,16 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 
 	// Update the existing version or create a new one
 	if err := a.repository.InsertVersionOrUpdateNumOfAppLaunches(version); err != nil {
-		log.Error(err)
 		return nil, err
 	}
 
 	device, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID)
 
-	// If we can't find the device by device ID and app ID
-	if err == models.ErrNotFound {
+	if err != nil {
+		// If we can't find the device by device ID and app ID
+		if err != models.ErrNotFound {
+			return nil, err
+		}
 		// Build a new device to save to the database
 		device = newDeviceFromDeviceAndVersion(*deviceInfo, *version)
 	}
