@@ -138,7 +138,7 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 	version.NumOfAppLaunches++
 
 	// Update the existing version or create a new one
-	if err := a.repository.InsertVersionOrUpdateNumOfAppLaunches(version); err != nil {
+	if err := a.repository.UpsertVersionWithAppLaunchesAndLastLaunched(version); err != nil {
 		return nil, err
 	}
 

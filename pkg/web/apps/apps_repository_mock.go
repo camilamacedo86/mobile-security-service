@@ -18,7 +18,7 @@ var (
 	lockRepositoryMockGetDeviceByVersionAndAppID            sync.RWMutex
 	lockRepositoryMockGetVersionByAppIDAndVersion           sync.RWMutex
 	lockRepositoryMockInsertDeviceOrUpdateVersionID         sync.RWMutex
-	lockRepositoryMockInsertVersionOrUpdateNumOfAppLaunches sync.RWMutex
+	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched sync.RWMutex
 	lockRepositoryMockUpdateAppVersions                     sync.RWMutex
 )
 
@@ -59,8 +59,8 @@ var _ Repository = &RepositoryMock{}
 //             InsertDeviceOrUpdateVersionIDFunc: func(device models.Device) error {
 // 	               panic("mock out the InsertDeviceOrUpdateVersionID method")
 //             },
-//             InsertVersionOrUpdateNumOfAppLaunchesFunc: func(version *models.Version) error {
-// 	               panic("mock out the InsertVersionOrUpdateNumOfAppLaunches method")
+//             UpsertVersionWithAppLaunchesAndLastLaunchedFunc: func(version *models.Version) error {
+// 	               panic("mock out the UpsertVersionWithAppLaunchesAndLastLaunched method")
 //             },
 //             UpdateAppVersionsFunc: func(versions []models.Version) error {
 // 	               panic("mock out the UpdateAppVersions method")
@@ -99,8 +99,8 @@ type RepositoryMock struct {
 	// InsertDeviceOrUpdateVersionIDFunc mocks the InsertDeviceOrUpdateVersionID method.
 	InsertDeviceOrUpdateVersionIDFunc func(device models.Device) error
 
-	// InsertVersionOrUpdateNumOfAppLaunchesFunc mocks the InsertVersionOrUpdateNumOfAppLaunches method.
-	InsertVersionOrUpdateNumOfAppLaunchesFunc func(version *models.Version) error
+	// UpsertVersionWithAppLaunchesAndLastLaunchedFunc mocks the UpsertVersionWithAppLaunchesAndLastLaunched method.
+	UpsertVersionWithAppLaunchesAndLastLaunchedFunc func(version *models.Version) error
 
 	// UpdateAppVersionsFunc mocks the UpdateAppVersions method.
 	UpdateAppVersionsFunc func(versions []models.Version) error
@@ -158,8 +158,8 @@ type RepositoryMock struct {
 			// Device is the device argument value.
 			Device models.Device
 		}
-		// InsertVersionOrUpdateNumOfAppLaunches holds details about calls to the InsertVersionOrUpdateNumOfAppLaunches method.
-		InsertVersionOrUpdateNumOfAppLaunches []struct {
+		// UpsertVersionWithAppLaunchesAndLastLaunched holds details about calls to the UpsertVersionWithAppLaunchesAndLastLaunched method.
+		UpsertVersionWithAppLaunchesAndLastLaunched []struct {
 			// Version is the version argument value.
 			Version *models.Version
 		}
@@ -461,34 +461,34 @@ func (mock *RepositoryMock) InsertDeviceOrUpdateVersionIDCalls() []struct {
 	return calls
 }
 
-// InsertVersionOrUpdateNumOfAppLaunches calls InsertVersionOrUpdateNumOfAppLaunchesFunc.
-func (mock *RepositoryMock) InsertVersionOrUpdateNumOfAppLaunches(version *models.Version) error {
-	if mock.InsertVersionOrUpdateNumOfAppLaunchesFunc == nil {
-		panic("RepositoryMock.InsertVersionOrUpdateNumOfAppLaunchesFunc: method is nil but Repository.InsertVersionOrUpdateNumOfAppLaunches was just called")
+// UpsertVersionWithAppLaunchesAndLastLaunched calls UpsertVersionWithAppLaunchesAndLastLaunchedFunc.
+func (mock *RepositoryMock) UpsertVersionWithAppLaunchesAndLastLaunched(version *models.Version) error {
+	if mock.UpsertVersionWithAppLaunchesAndLastLaunchedFunc == nil {
+		panic("RepositoryMock.UpsertVersionWithAppLaunchesAndLastLaunchedFunc: method is nil but Repository.UpsertVersionWithAppLaunchesAndLastLaunched was just called")
 	}
 	callInfo := struct {
 		Version *models.Version
 	}{
 		Version: version,
 	}
-	lockRepositoryMockInsertVersionOrUpdateNumOfAppLaunches.Lock()
-	mock.calls.InsertVersionOrUpdateNumOfAppLaunches = append(mock.calls.InsertVersionOrUpdateNumOfAppLaunches, callInfo)
-	lockRepositoryMockInsertVersionOrUpdateNumOfAppLaunches.Unlock()
-	return mock.InsertVersionOrUpdateNumOfAppLaunchesFunc(version)
+	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched.Lock()
+	mock.calls.UpsertVersionWithAppLaunchesAndLastLaunched = append(mock.calls.UpsertVersionWithAppLaunchesAndLastLaunched, callInfo)
+	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched.Unlock()
+	return mock.UpsertVersionWithAppLaunchesAndLastLaunchedFunc(version)
 }
 
-// InsertVersionOrUpdateNumOfAppLaunchesCalls gets all the calls that were made to InsertVersionOrUpdateNumOfAppLaunches.
+// UpsertVersionWithAppLaunchesAndLastLaunchedCalls gets all the calls that were made to UpsertVersionWithAppLaunchesAndLastLaunched.
 // Check the length with:
-//     len(mockedRepository.InsertVersionOrUpdateNumOfAppLaunchesCalls())
-func (mock *RepositoryMock) InsertVersionOrUpdateNumOfAppLaunchesCalls() []struct {
+//     len(mockedRepository.UpsertVersionWithAppLaunchesAndLastLaunchedCalls())
+func (mock *RepositoryMock) UpsertVersionWithAppLaunchesAndLastLaunchedCalls() []struct {
 	Version *models.Version
 } {
 	var calls []struct {
 		Version *models.Version
 	}
-	lockRepositoryMockInsertVersionOrUpdateNumOfAppLaunches.RLock()
-	calls = mock.calls.InsertVersionOrUpdateNumOfAppLaunches
-	lockRepositoryMockInsertVersionOrUpdateNumOfAppLaunches.RUnlock()
+	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched.RLock()
+	calls = mock.calls.UpsertVersionWithAppLaunchesAndLastLaunched
+	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched.RUnlock()
 	return calls
 }
 

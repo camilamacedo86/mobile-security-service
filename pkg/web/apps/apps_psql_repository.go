@@ -207,9 +207,9 @@ func (a *appsPostgreSQLRepository) GetAppByAppID(appID string) (*models.App, err
 
 }
 
-// InsertVersionOrUpdateNumOfAppLaunches creates a new version row
+// UpsertVersionWithAppLaunchesAndLastLaunched creates a new version row
 // or increments the num_of_app_launches counter if the version already exists
-func (a *appsPostgreSQLRepository) InsertVersionOrUpdateNumOfAppLaunches(version *models.Version) error {
+func (a *appsPostgreSQLRepository) UpsertVersionWithAppLaunchesAndLastLaunched(version *models.Version) error {
 	sqlStatement := `
 		INSERT INTO version(id, version, app_id, disabled, disabled_message, num_of_app_launches, last_launched_at)
 		VALUES($1, $2, $3, $4, $5, $6, NOW())

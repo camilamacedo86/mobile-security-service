@@ -533,7 +533,7 @@ func Test_appsService_InitClientApp(t *testing.T) {
 
 					return tt.fields.version, nil
 				},
-				InsertVersionOrUpdateNumOfAppLaunchesFunc: func(version *models.Version) error {
+				UpsertVersionWithAppLaunchesAndLastLaunchedFunc: func(version *models.Version) error {
 					if version == nil {
 						return models.ErrDatabaseError
 					}
