@@ -1,7 +1,6 @@
 package initclient
 
 import (
-	"errors"
 	"github.com/aerogear/mobile-security-service/pkg/web/apps"
 	"net/http"
 
@@ -34,7 +33,7 @@ func (h *HTTPHandler) InitClientApp(c echo.Context) error {
 	}
 
 	// Check the request body is valid
-	if err := validateInitRequestBody(deviceInfo); err != nil {
+	if err := deviceInfo.ValidateInitBody(); err != nil {
 		return httperrors.BadRequest(c, err.Error())
 	}
 
@@ -50,12 +49,4 @@ func (h *HTTPHandler) InitClientApp(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, initResponse)
-}
-
-// Request body must have version, appId and deviceId
-func validateInitRequestBody(deviceInfo *models.Device) error {
-	if deviceInfo.Version == "" || deviceInfo.AppID == "" || deviceInfo.DeviceID == "" {
-		return errors.New("version, appId and deviceId fields can't be empty")
-	}
-	return nil
 }
