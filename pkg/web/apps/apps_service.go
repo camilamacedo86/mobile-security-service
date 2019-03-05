@@ -16,7 +16,7 @@ type (
 		DisableAllAppVersionsByAppID(id string, message string) error
 		UnbindingAppByAppID(appID string) error
 		BindingAppByApp(appId, name string) error
-		InitClientApp(deviceInfo *models.Device) (*models.InitClient, error)
+		InitClientApp(deviceInfo *models.Device) (*models.Version, error)
 	}
 
 	appsService struct {
@@ -113,9 +113,8 @@ func (a *appsService) BindingAppByApp(appId, name string) error {
 	return a.repository.UnDeleteAppByAppID(app.AppID)
 }
 
-// InitClientApp retrieves the list of apps from the repository
-func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.InitClient, error) {
-	// Check if the app exists in the database for the sent app_id
+// // InitClientApp returns information about the current state of the app - its disabled status
+func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version, error) {
 	if _, err := a.repository.GetAppByAppID(deviceInfo.AppID); err != nil {
 		return nil, err
 	}
@@ -129,18 +128,14 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.InitClie
 
 	// If the version does not exist, create it
 	if err == models.ErrNotFound {
-		// Create new uuid for our new app version
-		versionUUID := uuid.New()
-
 		version = &models.Version{
-			ID:               versionUUID.String(),
-			Version:          deviceInfo.Version,
-			AppID:            deviceInfo.AppID,
-			NumOfAppLaunches: 0,
+			ID:      uuid.New().String(),
+			Version: deviceInfo.Version,
+			AppID:   deviceInfo.AppID,
 		}
 	}
 
-	// Increment the version App Launches
+	// Increment the number of app launches
 	version.NumOfAppLaunches++
 
 	// Update the existing version or create a new one
@@ -149,40 +144,69 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.InitClie
 		return nil, err
 	}
 
-	// If we can't find the device by version and app ID
-	if _, err = a.repository.GetDeviceByVersionAndAppID(version.Version, deviceInfo.AppID); err == models.ErrNotFound {
+	device, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID)
 
-		// If we can't find the device by device ID and app ID
-		if _, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID); err == models.ErrNotFound {
+	// If we can't find the device by device ID and app ID
+	if err == models.ErrNotFound {
+		// Build a new device to save to the database
+		device = newDeviceFromDeviceAndVersion(*deviceInfo, *version)
+	}
 
-			id := uuid.New()
+	if updateDeviceVersionID(device, version.ID) || updateDeviceDeviceVersion(device, deviceInfo.DeviceVersion) {
 
-			// Build a new device to save to the database
-			device := models.Device{
-				ID:            id.String(),
-				VersionID:     version.ID,
-				Version:       version.Version,
-				AppID:         deviceInfo.AppID,
-				DeviceID:      deviceInfo.DeviceID,
-				DeviceVersion: deviceInfo.DeviceVersion,
-				DeviceType:    deviceInfo.DeviceType,
-			}
+		err := a.repository.InsertDeviceOrUpdateVersionID(*device)
 
-			// Could not insert the device
-			if err := a.repository.CreateDevice(&device); err != nil {
-				log.Error(err)
-			}
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	// Build a model for the init data to return
-	initData := models.InitClient{
-		ID:              version.ID,
-		Version:         version.Version,
-		AppID:           version.AppID,
-		Disabled:        version.Disabled,
-		DisabledMessage: version.DisabledMessage,
+	// clear these values before returning the data
+	version.LastLaunchedAt = ""
+	version.NumOfAppLaunches = 0
+
+	return version, nil
+}
+
+// If the Device.VersionID property is different to @var versionID,
+// update it to match, returning a bool to indicate if it was updated
+func updateDeviceVersionID(device *models.Device, versionID string) bool {
+	var isUpdated bool
+
+	if device.VersionID != versionID {
+		device.VersionID = versionID
+
+		isUpdated = true
 	}
 
-	return &initData, nil
+	return isUpdated
+}
+
+// If the Device.DeviceVersion property is different to @var deviceVersion,
+// update it to match, returning a bool to indicate if it was updated
+func updateDeviceDeviceVersion(device *models.Device, deviceVersion string) bool {
+	var isUpdated bool
+
+	if device.DeviceVersion != deviceVersion {
+		device.DeviceVersion = deviceVersion
+
+		isUpdated = true
+	}
+
+	return isUpdated
+}
+
+// Build a new Device model from a combination of Device and Version model properties.
+func newDeviceFromDeviceAndVersion(d models.Device, v models.Version) *models.Device {
+	device := &models.Device{
+		ID:            uuid.New().String(),
+		VersionID:     v.ID,
+		Version:       v.Version,
+		AppID:         d.AppID,
+		DeviceID:      d.DeviceID,
+		DeviceVersion: d.DeviceVersion,
+		DeviceType:    d.DeviceType,
+	}
+
+	return device
 }
