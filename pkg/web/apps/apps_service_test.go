@@ -371,7 +371,7 @@ func Test_appsService_InitClientApp(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    *models.InitClient
+		want    *models.Version
 		wantErr error
 	}{
 		{
@@ -571,7 +571,7 @@ func Test_appsService_InitClientApp(t *testing.T) {
 			got, err := service.InitClientApp(tt.args.deviceInfo)
 
 			if err == nil {
-				tt.want = &models.InitClient{
+				tt.want = &models.Version{
 					ID:              tt.fields.version.ID,
 					Version:         tt.fields.version.Version,
 					AppID:           tt.fields.version.AppID,
