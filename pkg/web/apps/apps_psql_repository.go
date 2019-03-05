@@ -222,7 +222,7 @@ func (a *appsPostgreSQLRepository) InsertVersionOrUpdateNumOfAppLaunches(version
 
 	if err != nil {
 		log.Error(err)
-		return models.ErrDatabaseError
+		return models.ErrInternalServerError
 	}
 
 	return nil
@@ -241,7 +241,7 @@ func (a *appsPostgreSQLRepository) InsertDeviceOrUpdateVersionID(device models.D
 
 	if err != nil {
 		log.Error(err)
-		return models.ErrDatabaseError
+		return models.ErrInternalServerError
 	}
 
 	return nil
