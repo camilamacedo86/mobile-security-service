@@ -1,5 +1,7 @@
 package models
 
+import "github.com/aerogear/mobile-security-service/pkg/helpers"
+
 // App is the model struct for apps
 // swagger:model App
 type App struct {
@@ -10,4 +12,12 @@ type App struct {
 	NumOfCurrentInstalls  *int       `json:"numOfCurrentInstalls,omitempty"`
 	NumOfAppLaunches      *int       `json:"numOfAppLaunches,omitempty"`
 	DeployedVersions      *[]Version `json:"deployedVersions,omitempty"`
+}
+
+func NewApp(sdkInfo *Device) *App {
+	app := new(App)
+	app.ID = helpers.GetUUID()
+	app.AppID = sdkInfo.AppID
+	app.AppName = sdkInfo.AppName
+	return app
 }

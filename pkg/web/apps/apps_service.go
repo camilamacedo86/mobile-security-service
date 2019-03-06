@@ -3,7 +3,6 @@ package apps
 import (
 	"github.com/aerogear/mobile-security-service/pkg/helpers"
 	"github.com/aerogear/mobile-security-service/pkg/models"
-	"github.com/google/uuid"
 )
 
 type (
@@ -112,89 +111,160 @@ func (a *appsService) BindingAppByApp(appId, name string) error {
 	return a.repository.UnDeleteAppByAppID(app.AppID)
 }
 
-// // InitClientApp returns information about the current state of the app - its disabled status
-func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version, error) {
-	if _, err := a.repository.GetAppByAppID(deviceInfo.AppID); err != nil {
-		return nil, err
+func (a *appsService) checkDeviceWithThisVersion(deviceInfo *models.Device, hasVersion bool, hasApp bool) (bool, *models.Device, error){
+	// Has no need to do the queries if has not an app or version in the DB with the SDK info
+	if !hasApp || !hasVersion {
+		return false, nil, nil
+	}
+
+	device, err := a.repository.GetDeviceByVersionAndAppID(deviceInfo.Version, deviceInfo.AppID)
+	if err != nil && err != models.ErrNotFound {
+		return false, nil, nil
+	}
+
+	return true, device, nil
+}
+
+func (a *appsService) checkVersionForThisApp(deviceInfo *models.Device, hasApp bool) (bool, *models.Version, error){
+	// Has no need to do the queries if has not an app in the DB with the SDK info
+	if !hasApp {
+		return false, nil, nil
 	}
 
 	version, err := a.repository.GetVersionByAppIDAndVersion(deviceInfo.AppID, deviceInfo.Version)
-
-	// If any error other Not Found error occurred, return
 	if err != nil && err != models.ErrNotFound {
-		return nil, err
+		return false, nil, nil
+	}
+	return true, version, nil
+}
+
+func (a *appsService) checkAnyVersionOfAppForThisDevice(sdkInfo *models.Device, hasVersion bool, hasApp bool) (bool, *models.Device, error){
+	// Has no need to do the queries if has not an app or version in the DB with the SDK info
+	if !hasApp || hasVersion {
+		return false, nil, nil
 	}
 
-	// If the version does not exist, create it
-	if err == models.ErrNotFound {
-		version = &models.Version{
-			ID:      uuid.New().String(),
-			Version: deviceInfo.Version,
-			AppID:   deviceInfo.AppID,
-		}
+	device, err := a.repository.GetDeviceByDeviceIDandAppID(sdkInfo.DeviceID, sdkInfo.AppID)
+	if err != nil && err != models.ErrNotFound {
+		return false, nil, nil
 	}
+	return true, device, nil
+}
 
-	// Increment the number of app launches
-	version.NumOfAppLaunches++
 
-	// Update the existing version or create a new one
-	if err := a.repository.UpsertVersionWithAppLaunchesAndLastLaunched(version); err != nil {
-		return nil, err
+func (a *appsService) checkIfHasApp(deviceInfo *models.Device) (bool, *models.App, error){
+	app, err := a.repository.GetAppByAppID(deviceInfo.AppID)
+
+	if err != nil && err != models.ErrNotFound {
+		return false, nil, nil
 	}
+	return true, app, nil
+}
 
-	device, err := a.repository.GetDeviceByDeviceIDAndAppID(deviceInfo.DeviceID, deviceInfo.AppID)
-
+// Init call made from the SDK
+// Response: Version details
+// If the app, version and or device are not tracked in the database then it will be made
+func (a *appsService) InitClientApp(sdkInfo *models.Device) (*models.Version, error) {
+	hasApp, app, err := a.checkIfHasApp(sdkInfo)
 	if err != nil {
-		// If we can't find the device by device ID and app ID
-		if err != models.ErrNotFound {
-			return nil, err
-		}
-
-		// Build a new device to save to the database
-		device = models.NewDevice(version.ID, version.Version, deviceInfo.AppID, deviceInfo.DeviceID, deviceInfo.DeviceVersion, deviceInfo.DeviceType)
+		return nil, err
 	}
 
-	if updateDeviceVersionID(device, version.ID) || updateDeviceDeviceVersion(device, deviceInfo.DeviceVersion) {
+	hasVersion, version, err := a.checkVersionForThisApp(sdkInfo, hasApp)
+	if err != nil {
+		return nil, err
+	}
 
-		err := a.repository.InsertDeviceOrUpdateVersionID(*device)
-
+	//Check if the version is not disable before continue
+	// If it is disable than just response it
+	if hasVersion && version.Disabled {
+		// It is to return just the valid information for the device
+		response, err:= a.preperResponse(version)
 		if err != nil {
 			return nil, err
 		}
+		return response, nil
 	}
 
+	hasAnyOtherVersion, deviceDiffVersion, err := a.checkAnyVersionOfAppForThisDevice(sdkInfo, hasVersion, hasApp)
+	if err != nil {
+		return nil, err
+	}
+
+	hasDeviceVersion, deviceWithVersion, err := a.checkDeviceWithThisVersion(sdkInfo, hasVersion, hasApp)
+	if err != nil {
+		return nil, err
+	}
+
+	//** Launch Scenario **
+	// If has a version and has tracked a device using this version then it is the launch scenario
+	if hasDeviceVersion {
+		if err = a.repository.IncrementVersionTotals(deviceWithVersion.VersionID, false) ; err != nil {
+			return nil, err;
+		}
+	}
+
+	//** New install Scenario **
+	//If has a version but has NOT tracked a device using this version then it is the new install
+	if hasVersion && !hasDeviceVersion {
+		device := models.NewDevice(sdkInfo, app, version)
+		if err := a.repository.InsertDeviceOrUpdateVersionID(device);err != nil {
+			return nil, err
+		}
+		a.repository.IncrementVersionTotals(version.ID, true)
+	}
+
+	// ** New version and new install Scenario **
+	// If has NOT the version then it is a new device install of a new version
+	if !hasVersion && !hasDeviceVersion {
+		version := models.NewVersion(sdkInfo, app)
+		if err = a.handleNewVersionAndInstall(version, sdkInfo, deviceDiffVersion, app, hasAnyOtherVersion); err != nil {
+			return nil, err
+		}
+	}
+
+	//** New APP Scenario **
+	if !hasVersion && !hasDeviceVersion && !hasApp {
+		// Create new App with the data sent froom the SDK
+		if err = a.repository.CreateApp(helpers.GetUUID(), sdkInfo.AppID, sdkInfo.AppName);err != nil {
+			return nil, err
+		}
+		// Create the new Version, and Device for this call
+		app, err := a.repository.GetAppByAppID(app.AppID)
+		version := models.NewVersion(sdkInfo, app)
+		if err = a.handleNewVersionAndInstall(version, sdkInfo, deviceDiffVersion, app, hasAnyOtherVersion); err != nil {
+			return nil, err
+		}
+	}
+
+	// It is to return just the valid information for the device
+	response, err:= a.preperResponse(version)
+	if err != nil {
+		return nil, err
+	}
+	return response, nil
+
+}
+
+func (a *appsService) handleNewVersionAndInstall(version *models.Version, sdkInfo, deviceDiffVersion *models.Device, app *models.App, hasAnyOtherVersion bool) error {
+	if err := a.repository.CreateNewVersion(version); err != nil {
+		return err
+	}
+	device := models.NewDevice(sdkInfo, app, version)
+	if err := a.repository.InsertDeviceOrUpdateVersionID(device);err != nil {
+		return err
+	}
+	a.repository.IncrementVersionTotals(version.ID, true)
+	return nil
+}
+
+
+
+//Remove the data info that should be not returned to the SDK
+func (a *appsService) preperResponse(version *models.Version) (*models.Version, error) {
 	// clear these values before returning the data
 	version.LastLaunchedAt = ""
 	version.NumOfAppLaunches = 0
 	version.NumOfCurrentInstalls = 0
-
 	return version, nil
-}
-
-// If the Device.VersionID property is different to @var versionID,
-// update it to match, returning a bool to indicate if it was updated
-func updateDeviceVersionID(device *models.Device, versionID string) bool {
-	var isUpdated bool
-
-	if device.VersionID != versionID {
-		device.VersionID = versionID
-
-		isUpdated = true
-	}
-
-	return isUpdated
-}
-
-// If the Device.DeviceVersion property is different to @var deviceVersion,
-// update it to match, returning a bool to indicate if it was updated
-func updateDeviceDeviceVersion(device *models.Device, deviceVersion string) bool {
-	var isUpdated bool
-
-	if device.DeviceVersion != deviceVersion {
-		device.DeviceVersion = deviceVersion
-
-		isUpdated = true
-	}
-
-	return isUpdated
 }

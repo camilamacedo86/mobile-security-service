@@ -1,5 +1,7 @@
 package models
 
+import "github.com/aerogear/mobile-security-service/pkg/helpers"
+
 // Version model
 // swagger:model Version
 type Version struct {
@@ -12,4 +14,12 @@ type Version struct {
 	NumOfAppLaunches     int64    `json:"numOfAppLaunches,omitempty"`
 	LastLaunchedAt       string   `json:"lastLaunchedAt,omitempty"`
 	Devices              []Device `json:"devices,omitempty"`
+}
+
+func NewVersion(sdkInfo *Device, app *App) *Version {
+	ver := new(Version)
+	ver.ID = helpers.GetUUID()
+	ver.AppID = app.AppID
+	ver.Disabled = false
+	return ver
 }

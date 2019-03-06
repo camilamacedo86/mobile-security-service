@@ -16,8 +16,9 @@ type Repository interface {
 	GetAppByAppID(appID string) (*models.App, error)
 	UnDeleteAppByAppID(appID string) error
 	GetVersionByAppIDAndVersion(appID string, versionNumber string) (*models.Version, error)
-	GetDeviceByDeviceIDAndAppID(deviceID string, appID string) (*models.Device, error)
+	GetDeviceByDeviceIDandAppID(deviceID string, appID string) (*models.Device, error)
 	GetDeviceByVersionAndAppID(versionID string, appID string) (*models.Device, error)
-	UpsertVersionWithAppLaunchesAndLastLaunched(version *models.Version) error
-	InsertDeviceOrUpdateVersionID(device models.Device) error
+	CreateNewVersion(version *models.Version) error
+	InsertDeviceOrUpdateVersionID(device *models.Device) error
+	IncrementVersionTotals(versionID string, isNewInstal bool) error
 }

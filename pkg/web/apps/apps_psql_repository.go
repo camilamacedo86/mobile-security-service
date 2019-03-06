@@ -143,7 +143,7 @@ func (a *appsPostgreSQLRepository) GetVersionByAppIDAndVersion(appID string, ver
 	return &version, nil
 }
 
-// GetDeviceByDeviceIDAndAppID returns a device by its device ID and app ID
+// GetDeviceByDeviceIDandAppID returns a device by its device ID and app ID
 func (a *appsPostgreSQLRepository) GetDeviceByDeviceIDAndAppID(deviceID string, appID string) (*models.Device, error) {
 	device := models.Device{}
 
@@ -206,22 +206,18 @@ func (a *appsPostgreSQLRepository) GetAppByAppID(appID string) (*models.App, err
 
 }
 
-// UpsertVersionWithAppLaunchesAndLastLaunched creates a new version row
+// CreateNewVersion creates a new version row
 // or increments the num_of_app_launches counter if the version already exists
-func (a *appsPostgreSQLRepository) UpsertVersionWithAppLaunchesAndLastLaunched(version *models.Version) error {
+func (a *appsPostgreSQLRepository) CreateNewVersion(version *models.Version) error {
 	sqlStatement := `
-		INSERT INTO version(id, version, app_id, disabled, disabled_message, num_of_app_launches, last_launched_at)
-		VALUES($1, $2, $3, $4, $5, $6, NOW())
-		ON CONFLICT (id)
-		DO UPDATE
-		SET num_of_app_launches = $6,
-		last_launched_at = NOW();`
+		INSERT INTO version(id, version, app_id)
+		VALUES($1, $2, $3);`
 
-	_, err := a.db.Exec(sqlStatement, version.ID, version.Version, version.AppID, version.Disabled, version.DisabledMessage, version.NumOfAppLaunches)
+	_, err := a.db.Exec(sqlStatement, version.ID, version.Version, version.AppID)
 
 	if err != nil {
 		log.Error(err)
-		return models.ErrInternalServerError
+		return err
 	}
 
 	return nil
