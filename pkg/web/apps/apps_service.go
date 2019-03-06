@@ -151,7 +151,7 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 		}
 
 		// Build a new device to save to the database
-		device = models.NewDevice(version.ID, version.Version, device.AppID, device.DeviceID, device.DeviceVersion, device.DeviceType)
+		device = models.NewDevice(version.ID, version.Version, deviceInfo.AppID, deviceInfo.DeviceID, deviceInfo.DeviceVersion, deviceInfo.DeviceType)
 	}
 
 	if updateDeviceVersionID(device, version.ID) || updateDeviceDeviceVersion(device, deviceInfo.DeviceVersion) {
