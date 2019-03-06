@@ -1,6 +1,7 @@
 package initclient
 
 import (
+	"github.com/aerogear/mobile-security-service/pkg/helpers"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -31,55 +32,28 @@ func TestHTTPHandler_InitClientApp(t *testing.T) {
 		{
 			name: "A 400 Bad Request should be returned when request body is missing device ID",
 			args: args{
-				device: models.Device{
-					ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
-					VersionID:     "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
-					AppID:         "com.aerogear.testapp",
-					DeviceVersion: "1.1",
-					Version:       "9.1.1",
-					DeviceType:    "Android",
-				},
+				device: helpers.getMockDeviceWithMissingDeviceID(),
 			},
 			wantStatusCode: 400,
 		},
 		{
 			name: "A 400 Bad Request should be returned when request body is missing version",
 			args: args{
-				device: models.Device{
-					ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
-					DeviceID:      "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
-					AppID:         "com.aerogear.testapp",
-					DeviceVersion: "1.1",
-					DeviceType:    "Android",
-				},
+				device: helpers.GetMockDeviceWithMissingVersion(),
 			},
 			wantStatusCode: 400,
 		},
 		{
 			name: "A 400 Bad Request should be returned when request body is missing app ID",
 			args: args{
-				device: models.Device{
-					ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
-					VersionID:     "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
-					DeviceVersion: "1.1",
-					Version:       "9.1.1",
-					DeviceType:    "Android",
-				},
+				device: helpers.GetMockDeviceWithMissingAppID(),
 			},
 			wantStatusCode: 400,
 		},
 		{
 			name: "Expect init data to be returned when valid device is supplied",
 			args: args{
-				device: models.Device{
-					ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
-					VersionID:     "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
-					DeviceID:      "db511711-95e8-4da2-8e76-1700465ae8ca",
-					AppID:         "com.aerogear.testapp",
-					DeviceVersion: "1.1",
-					Version:       "9.1.1",
-					DeviceType:    "Android",
-				},
+				device: helpers.GetMockDevice(),
 			},
 			wantStatusCode: 200,
 		},

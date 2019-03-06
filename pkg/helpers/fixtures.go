@@ -76,6 +76,7 @@ func GetMockAppVersionForDisableAll() models.Version {
 	}
 }
 
+// GetMockDevice returns a mock device
 func GetMockDevice() *models.Device {
 	return &models.Device{
 		ID:            uuid.New().String(),
@@ -87,6 +88,7 @@ func GetMockDevice() *models.Device {
 	}
 }
 
+// GetMockVersion returns a mock version
 func GetMockVersion() *models.Version {
 	return &models.Version{
 		ID:               uuid.New().String(),
@@ -108,4 +110,38 @@ func GetMockDevices(number int) []models.Device {
 	}
 
 	return devices
+}
+
+// GetMockDeviceWithMissingAppID returns a device without the AppID property
+func GetMockDeviceWithMissingAppID() models.Device {
+	return models.Device{
+		ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
+		VersionID:     "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
+		DeviceVersion: "1.1",
+		Version:       "9.1.1",
+		DeviceType:    "Android",
+	}
+}
+
+// GetMockDeviceWithMissingVersion returns a device without the version
+func GetMockDeviceWithMissingVersion() models.Device {
+	return models.Device{
+		ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
+		DeviceID:      "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
+		AppID:         "com.aerogear.testapp",
+		DeviceVersion: "1.1",
+		DeviceType:    "Android",
+	}
+}
+
+// GetMockDeviceWithMissingDeviceID returns a device without DeviceID
+func GetMockDeviceWithMissingDeviceID() models.Device {
+	return models.Device{
+		ID:            "d1895cc1-28d7-4283-932d-8bcab9e4a469",
+		VersionID:     "1a3fbe59-e69c-42c7-b9c0-d7eb7e65c073",
+		AppID:         "com.aerogear.testapp",
+		DeviceVersion: "1.1",
+		Version:       "9.1.1",
+		DeviceType:    "Android",
+	}
 }
