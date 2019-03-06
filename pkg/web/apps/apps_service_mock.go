@@ -9,18 +9,12 @@ import (
 )
 
 var (
-<<<<<<< HEAD
 	lockServiceMockBindingAppByApp              sync.RWMutex
 	lockServiceMockDisableAllAppVersionsByAppID sync.RWMutex
 	lockServiceMockGetActiveAppByID             sync.RWMutex
 	lockServiceMockGetApps                      sync.RWMutex
-	lockServiceMockUnbindingAppByAppID          sync.RWMutex
-=======
-	lockServiceMockDisableAllAppVersionsByAppID sync.RWMutex
-	lockServiceMockGetAppByID                   sync.RWMutex
-	lockServiceMockGetApps                      sync.RWMutex
 	lockServiceMockInitClientApp                sync.RWMutex
->>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
+	lockServiceMockUnbindingAppByAppID          sync.RWMutex
 	lockServiceMockUpdateAppVersions            sync.RWMutex
 )
 
@@ -46,25 +40,11 @@ var _ Service = &ServiceMock{}
 //             GetAppsFunc: func() (*[]models.App, error) {
 // 	               panic("mock out the GetApps method")
 //             },
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
+//             InitClientAppFunc: func(deviceInfo *models.Device) (*models.Version, error) {
+// 	               panic("mock out the InitClientApp method")
+//             },
 //             UnbindingAppByAppIDFunc: func(appID string) error {
 // 	               panic("mock out the UnbindingAppByAppID method")
-//             },
-=======
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
->>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
-//             UpdateAppVersionsFunc: func(versions []models.Version) error {
-// 	               panic("mock out the UpdateAppVersions method")
-=======
-=======
->>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
-//             InitClientAppFunc: func(deviceInfo *models.Device) (*models.InitClient, error) {
-=======
-//             InitClientAppFunc: func(deviceInfo *models.Device) (*models.Version, error) {
->>>>>>> feat(init): Change response type (AEROGEAR-8360)
-// 	               panic("mock out the InitClientApp method")
 //             },
 //             UpdateAppVersionsFunc: func(versions []models.Version) error {
 // 	               panic("mock out the UpdateAppVersions method")
@@ -88,21 +68,11 @@ type ServiceMock struct {
 	// GetAppsFunc mocks the GetApps method.
 	GetAppsFunc func() (*[]models.App, error)
 
-<<<<<<< HEAD
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
-	// UnbindingAppByAppIDFunc mocks the UnbindingAppByAppID method.
-	UnbindingAppByAppIDFunc func(appID string) error
-
-=======
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
->>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
-	// UpdateAppVersionsFunc mocks the UpdateAppVersions method.
-	UpdateAppVersionsFunc func(versions []models.Version) error
-=======
-=======
->>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 	// InitClientAppFunc mocks the InitClientApp method.
 	InitClientAppFunc func(deviceInfo *models.Device) (*models.Version, error)
+
+	// UnbindingAppByAppIDFunc mocks the UnbindingAppByAppID method.
+	UnbindingAppByAppIDFunc func(appID string) error
 
 	// UpdateAppVersionsFunc mocks the UpdateAppVersions method.
 	UpdateAppVersionsFunc func(versions []models.Version) error
@@ -131,27 +101,15 @@ type ServiceMock struct {
 		// GetApps holds details about calls to the GetApps method.
 		GetApps []struct {
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
-		// UnbindingAppByAppID holds details about calls to the UnbindingAppByAppID method.
-		UnbindingAppByAppID []struct {
-			// AppID is the appID argument value.
-			AppID string
-		}
-=======
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
->>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
-		// UpdateAppVersions holds details about calls to the UpdateAppVersions method.
-		UpdateAppVersions []struct {
-			// Versions is the versions argument value.
-			Versions []models.Version
-=======
-=======
->>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 		// InitClientApp holds details about calls to the InitClientApp method.
 		InitClientApp []struct {
 			// DeviceInfo is the deviceInfo argument value.
 			DeviceInfo *models.Device
+		}
+		// UnbindingAppByAppID holds details about calls to the UnbindingAppByAppID method.
+		UnbindingAppByAppID []struct {
+			// AppID is the appID argument value.
+			AppID string
 		}
 		// UpdateAppVersions holds details about calls to the UpdateAppVersions method.
 		UpdateAppVersions []struct {
@@ -288,73 +246,6 @@ func (mock *ServiceMock) GetAppsCalls() []struct {
 	return calls
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
-// UnbindingAppByAppID calls UnbindingAppByAppIDFunc.
-func (mock *ServiceMock) UnbindingAppByAppID(appID string) error {
-	if mock.UnbindingAppByAppIDFunc == nil {
-		panic("ServiceMock.UnbindingAppByAppIDFunc: method is nil but Service.UnbindingAppByAppID was just called")
-	}
-	callInfo := struct {
-		AppID string
-	}{
-		AppID: appID,
-	}
-	lockServiceMockUnbindingAppByAppID.Lock()
-	mock.calls.UnbindingAppByAppID = append(mock.calls.UnbindingAppByAppID, callInfo)
-	lockServiceMockUnbindingAppByAppID.Unlock()
-	return mock.UnbindingAppByAppIDFunc(appID)
-}
-
-// UnbindingAppByAppIDCalls gets all the calls that were made to UnbindingAppByAppID.
-// Check the length with:
-//     len(mockedService.UnbindingAppByAppIDCalls())
-func (mock *ServiceMock) UnbindingAppByAppIDCalls() []struct {
-	AppID string
-} {
-	var calls []struct {
-		AppID string
-	}
-	lockServiceMockUnbindingAppByAppID.RLock()
-	calls = mock.calls.UnbindingAppByAppID
-	lockServiceMockUnbindingAppByAppID.RUnlock()
-	return calls
-}
-
-=======
-<<<<<<< HEAD:pkg/web/apps/apps_service_mock_test.go
->>>>>>> feat(init): Moved service logic into app service (AEROGEAR-8360):pkg/web/apps/apps_service_mock.go
-// UpdateAppVersions calls UpdateAppVersionsFunc.
-func (mock *ServiceMock) UpdateAppVersions(versions []models.Version) error {
-	if mock.UpdateAppVersionsFunc == nil {
-		panic("ServiceMock.UpdateAppVersionsFunc: method is nil but Service.UpdateAppVersions was just called")
-	}
-	callInfo := struct {
-		Versions []models.Version
-	}{
-		Versions: versions,
-	}
-	lockServiceMockUpdateAppVersions.Lock()
-	mock.calls.UpdateAppVersions = append(mock.calls.UpdateAppVersions, callInfo)
-	lockServiceMockUpdateAppVersions.Unlock()
-	return mock.UpdateAppVersionsFunc(versions)
-}
-
-// UpdateAppVersionsCalls gets all the calls that were made to UpdateAppVersions.
-// Check the length with:
-//     len(mockedService.UpdateAppVersionsCalls())
-func (mock *ServiceMock) UpdateAppVersionsCalls() []struct {
-	Versions []models.Version
-} {
-	var calls []struct {
-		Versions []models.Version
-	}
-	lockServiceMockUpdateAppVersions.RLock()
-	calls = mock.calls.UpdateAppVersions
-	lockServiceMockUpdateAppVersions.RUnlock()
-=======
-=======
->>>>>>> fix(tests): Regenerated mocks (AEROGEAR-8360)
 // InitClientApp calls InitClientAppFunc.
 func (mock *ServiceMock) InitClientApp(deviceInfo *models.Device) (*models.Version, error) {
 	if mock.InitClientAppFunc == nil {
@@ -383,6 +274,37 @@ func (mock *ServiceMock) InitClientAppCalls() []struct {
 	lockServiceMockInitClientApp.RLock()
 	calls = mock.calls.InitClientApp
 	lockServiceMockInitClientApp.RUnlock()
+	return calls
+}
+
+// UnbindingAppByAppID calls UnbindingAppByAppIDFunc.
+func (mock *ServiceMock) UnbindingAppByAppID(appID string) error {
+	if mock.UnbindingAppByAppIDFunc == nil {
+		panic("ServiceMock.UnbindingAppByAppIDFunc: method is nil but Service.UnbindingAppByAppID was just called")
+	}
+	callInfo := struct {
+		AppID string
+	}{
+		AppID: appID,
+	}
+	lockServiceMockUnbindingAppByAppID.Lock()
+	mock.calls.UnbindingAppByAppID = append(mock.calls.UnbindingAppByAppID, callInfo)
+	lockServiceMockUnbindingAppByAppID.Unlock()
+	return mock.UnbindingAppByAppIDFunc(appID)
+}
+
+// UnbindingAppByAppIDCalls gets all the calls that were made to UnbindingAppByAppID.
+// Check the length with:
+//     len(mockedService.UnbindingAppByAppIDCalls())
+func (mock *ServiceMock) UnbindingAppByAppIDCalls() []struct {
+	AppID string
+} {
+	var calls []struct {
+		AppID string
+	}
+	lockServiceMockUnbindingAppByAppID.RLock()
+	calls = mock.calls.UnbindingAppByAppID
+	lockServiceMockUnbindingAppByAppID.RUnlock()
 	return calls
 }
 

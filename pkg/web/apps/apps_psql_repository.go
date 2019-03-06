@@ -310,24 +310,6 @@ func (a *appsPostgreSQLRepository) CreateApp(id, appId, name string) error {
 	return nil
 }
 
-func (a *appsPostgreSQLRepository) GetAppByAppID(appID string) (*models.App, error) {
-
-	var app models.App
-
-	sqlStatement := `SELECT id,app_id,app_name FROM app WHERE app_id=$1;`
-	row := a.db.QueryRow(sqlStatement, appID)
-	err := row.Scan(&app.ID, &app.AppID, &app.AppName)
-	if err != nil {
-		log.Error(err)
-		if err == sql.ErrNoRows {
-			return nil, models.ErrNotFound
-		}
-		return nil, models.ErrInternalServerError
-	}
-
-	return &app, nil
-}
-
 func (a *appsPostgreSQLRepository) UnDeleteAppByAppID(appId string) error {
 
 	_, err := a.db.Exec(`
