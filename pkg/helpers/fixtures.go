@@ -31,7 +31,7 @@ func GetMockAppList() []models.App {
 func GetMockApp() *models.App {
 	versionlist := GetMockAppVersionList()
 	app := &models.App{
-		ID:               "7f89ce49-a736-459e-9110-e52d049fc025",
+		ID:               uuid.New().String(),
 		AppID:            "com.aerogear.mobile_app_one",
 		AppName:          "Mobile App One",
 		DeployedVersions: &versionlist,
@@ -96,4 +96,16 @@ func GetMockVersion() *models.Version {
 		Disabled:         false,
 		NumOfAppLaunches: 10000,
 	}
+}
+
+// GetMockDevices generates a slice of Devices
+func GetMockDevices(number int) []models.Device {
+	var devices []models.Device
+
+	for i := 0; i < number; i++ {
+		d := GetMockDevice()
+		devices = append(devices, *d)
+	}
+
+	return devices
 }

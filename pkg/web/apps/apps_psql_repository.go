@@ -2,7 +2,6 @@ package apps
 
 import (
 	"database/sql"
-	"fmt"
 
 	"github.com/aerogear/mobile-security-service/pkg/models"
 	_ "github.com/lib/pq"
@@ -259,7 +258,6 @@ func (a *appsPostgreSQLRepository) UpdateAppVersions(versions []models.Version) 
 		WHERE ID=$3;`, versions[i].DisabledMessage, versions[i].Disabled, versions[i].ID)
 
 		if err != nil {
-			fmt.Print(err)
 			log.Error(err)
 			return err
 		}
