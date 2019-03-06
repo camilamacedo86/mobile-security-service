@@ -149,8 +149,9 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 		if err != models.ErrNotFound {
 			return nil, err
 		}
+
 		// Build a new device to save to the database
-		device = newDeviceFromDeviceAndVersion(*deviceInfo, *version)
+		device = models.NewDevice(version.ID, version.Version, device.AppID, device.DeviceID, device.DeviceVersion, device.DeviceType)
 	}
 
 	if updateDeviceVersionID(device, version.ID) || updateDeviceDeviceVersion(device, deviceInfo.DeviceVersion) {
@@ -195,19 +196,4 @@ func updateDeviceDeviceVersion(device *models.Device, deviceVersion string) bool
 	}
 
 	return isUpdated
-}
-
-// Build a new Device model from a combination of Device and Version model properties.
-func newDeviceFromDeviceAndVersion(d models.Device, v models.Version) *models.Device {
-	device := &models.Device{
-		ID:            uuid.New().String(),
-		VersionID:     v.ID,
-		Version:       v.Version,
-		AppID:         d.AppID,
-		DeviceID:      d.DeviceID,
-		DeviceVersion: d.DeviceVersion,
-		DeviceType:    d.DeviceType,
-	}
-
-	return device
 }

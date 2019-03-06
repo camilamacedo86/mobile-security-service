@@ -9,17 +9,17 @@ import (
 )
 
 var (
-	lockRepositoryMockDisableAllAppVersionsByAppID          sync.RWMutex
-	lockRepositoryMockGetAppByAppID                         sync.RWMutex
-	lockRepositoryMockGetAppByID                            sync.RWMutex
-	lockRepositoryMockGetAppVersionsByAppID                 sync.RWMutex
-	lockRepositoryMockGetApps                               sync.RWMutex
-	lockRepositoryMockGetDeviceByDeviceIDAndAppID           sync.RWMutex
-	lockRepositoryMockGetDeviceByVersionAndAppID            sync.RWMutex
-	lockRepositoryMockGetVersionByAppIDAndVersion           sync.RWMutex
-	lockRepositoryMockInsertDeviceOrUpdateVersionID         sync.RWMutex
+	lockRepositoryMockDisableAllAppVersionsByAppID                sync.RWMutex
+	lockRepositoryMockGetAppByAppID                               sync.RWMutex
+	lockRepositoryMockGetAppByID                                  sync.RWMutex
+	lockRepositoryMockGetAppVersionsByAppID                       sync.RWMutex
+	lockRepositoryMockGetApps                                     sync.RWMutex
+	lockRepositoryMockGetDeviceByDeviceIDAndAppID                 sync.RWMutex
+	lockRepositoryMockGetDeviceByVersionAndAppID                  sync.RWMutex
+	lockRepositoryMockGetVersionByAppIDAndVersion                 sync.RWMutex
+	lockRepositoryMockInsertDeviceOrUpdateVersionID               sync.RWMutex
 	lockRepositoryMockUpsertVersionWithAppLaunchesAndLastLaunched sync.RWMutex
-	lockRepositoryMockUpdateAppVersions                     sync.RWMutex
+	lockRepositoryMockUpdateAppVersions                           sync.RWMutex
 )
 
 // Ensure, that RepositoryMock does implement Repository.

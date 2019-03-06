@@ -2,6 +2,8 @@ package models
 
 import (
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 // Device model
@@ -14,6 +16,19 @@ type Device struct {
 	DeviceID      string `json:"deviceId"`
 	DeviceVersion string `json:"deviceVersion"`
 	DeviceType    string `json:"deviceType"`
+}
+
+// NewDevice returns a new Device model
+func NewDevice(versionID string, version string, appID string, deviceID string, deviceVersion string, deviceType string) *Device {
+	return &Device{
+		ID:            uuid.New().String(),
+		VersionID:     versionID,
+		Version:       version,
+		AppID:         appID,
+		DeviceID:      deviceID,
+		DeviceVersion: deviceVersion,
+		DeviceType:    deviceType,
+	}
 }
 
 // ValidateInitBody validates the properties of an init
