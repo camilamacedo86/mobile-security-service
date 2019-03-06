@@ -587,7 +587,7 @@ func Test_appsService_InitClientApp(t *testing.T) {
 
 			// If a new version was not created, expect to return an exact device match
 			if tt.fields.version != nil && (tt.fields.version.Version == tt.args.deviceInfo.Version && tt.fields.version.AppID == tt.args.deviceInfo.AppID) && !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("appsService.InitClientApp() = %v, want %v", got, tt.want)
+				t.Errorf("appsService.InitClientApp() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

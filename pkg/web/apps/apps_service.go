@@ -166,6 +166,7 @@ func (a *appsService) InitClientApp(deviceInfo *models.Device) (*models.Version,
 	// clear these values before returning the data
 	version.LastLaunchedAt = ""
 	version.NumOfAppLaunches = 0
+	version.NumOfCurrentInstalls = 0
 
 	return version, nil
 }
