@@ -130,12 +130,12 @@ func SetAppRoutes(r *echo.Group, appsHandler apps.HTTPHandler) {
 }
 
 func SetInitRoutes(r *echo.Group, initHandler *initclient.HTTPHandler) {
-	// swagger:operation POST /init appInitResponse
+	// swagger:operation POST /init Device
 	//
 	// Capture metrics from device and return if the app version they are using is disabled and has a set disabled message
 	// ---
 	// summary: Init call from sdk
-	// operationId: initAppFromDevice
+	// operationId: InitClientApp
 	// produces:
 	// - application/json
 	// parameters:
@@ -144,13 +144,13 @@ func SetInitRoutes(r *echo.Group, initHandler *initclient.HTTPHandler) {
 	//   description: Updated app object
 	//   required: true
 	//   schema:
-	//     $ref: '#/definitions/AppInitRes'
+	//     $ref: '#/definitions/Version'
 	// responses:
 	//   200:
 	//     description: successful operation
 	//   400:
-	//     description: Invalid appId supplied
+	//     description: Invalid id supplied
 	//   404:
-	//     description: App not found
+	//     description: Data not found
 	r.POST("/init", initHandler.InitClientApp)
 }
